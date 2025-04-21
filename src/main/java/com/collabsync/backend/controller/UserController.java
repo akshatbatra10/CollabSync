@@ -1,5 +1,7 @@
 package com.collabsync.backend.controller;
 
+import com.collabsync.backend.common.dto.user.UserLoginRequestDto;
+import com.collabsync.backend.common.dto.user.UserLoginResponseDto;
 import com.collabsync.backend.common.dto.user.UserResponseDto;
 import com.collabsync.backend.common.dto.user.UserSignupRequestDto;
 import com.collabsync.backend.service.UserService;
@@ -22,5 +24,11 @@ public class UserController {
     public ResponseEntity<UserResponseDto> signup(@RequestBody @Valid UserSignupRequestDto request) {
         UserResponseDto userResponseDto = userService.createUser(request);
         return ResponseEntity.ok(userResponseDto);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponseDto> login(@RequestBody @Valid UserLoginRequestDto request) {
+        UserLoginResponseDto userLoginResponseDto = userService.loginUser(request);
+        return ResponseEntity.ok(userLoginResponseDto);
     }
 }
