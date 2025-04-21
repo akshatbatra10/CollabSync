@@ -1,4 +1,4 @@
-package com.collabsync.backend.user.controller;
+package com.collabsync.backend.controller;
 
 import com.collabsync.backend.config.AppConfigProperties;
 import jakarta.annotation.PostConstruct;
