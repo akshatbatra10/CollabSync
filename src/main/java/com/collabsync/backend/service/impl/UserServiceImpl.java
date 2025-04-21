@@ -7,6 +7,7 @@ import com.collabsync.backend.domain.model.User;
 import com.collabsync.backend.repository.UserRepository;
 import com.collabsync.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,9 +17,11 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponseDto createUser(UserSignupRequestDto request) {
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateUserException("Email already in use");
@@ -32,7 +35,7 @@ public class UserServiceImpl implements UserService {
                 .fullName(request.getFullName())
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(encodedPassword)
                 .build();
 
         User savedUser = userRepository.save(user);
