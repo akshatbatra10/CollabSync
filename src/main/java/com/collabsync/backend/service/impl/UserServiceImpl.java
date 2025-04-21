@@ -2,6 +2,7 @@ package com.collabsync.backend.service.impl;
 
 import com.collabsync.backend.common.dto.user.UserResponseDto;
 import com.collabsync.backend.common.dto.user.UserSignupRequestDto;
+import com.collabsync.backend.common.exceptions.DuplicateUserException;
 import com.collabsync.backend.domain.model.User;
 import com.collabsync.backend.repository.UserRepository;
 import com.collabsync.backend.service.UserService;
@@ -18,6 +19,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserSignupRequestDto request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateUserException("Email already in use");
+        }
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateUserException("Username already in use");
+        }
+
         User user = User.builder()
                 .fullName(request.getFullName())
                 .username(request.getUsername())
