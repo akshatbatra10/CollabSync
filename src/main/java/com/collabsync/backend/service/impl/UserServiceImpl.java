@@ -8,6 +8,7 @@ import com.collabsync.backend.common.exceptions.DuplicateUserException;
 import com.collabsync.backend.common.exceptions.InvalidCredentialsException;
 import com.collabsync.backend.domain.model.User;
 import com.collabsync.backend.repository.UserRepository;
+import com.collabsync.backend.security.JwtService;
 import com.collabsync.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     public UserResponseDto createUser(UserSignupRequestDto request) {
@@ -61,7 +63,9 @@ public class UserServiceImpl implements UserService {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
-        return new UserLoginResponseDto("Login successful");
+        String token = jwtService.generateToken(user.getUsername());
+
+        return new UserLoginResponseDto("Login successful", token);
     }
 
     @Override
