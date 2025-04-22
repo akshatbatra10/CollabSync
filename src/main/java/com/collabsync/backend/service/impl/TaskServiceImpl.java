@@ -3,6 +3,7 @@ package com.collabsync.backend.service.impl;
 import com.collabsync.backend.common.dto.task.TaskRequestDto;
 import com.collabsync.backend.common.dto.task.TaskResponseDto;
 import com.collabsync.backend.common.enums.TaskStatus;
+import com.collabsync.backend.domain.model.Project;
 import com.collabsync.backend.domain.model.Task;
 import com.collabsync.backend.repository.TaskRepository;
 import com.collabsync.backend.service.TaskService;
@@ -24,7 +25,7 @@ public class TaskServiceImpl implements TaskService {
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .status(request.getStatus() != null ? request.getStatus() : TaskStatus.PENDING)
-                .projectId(request.getProjectId())
+                .project(Project.builder().id(request.getProjectId()).build())
                 .createdBy(createdBy)
                 .build();
 
@@ -49,7 +50,7 @@ public class TaskServiceImpl implements TaskService {
                 .description(task.getDescription())
                 .status(task.getStatus())
                 .createdBy(task.getCreatedBy())
-                .projectId(task.getProjectId())
+                .projectId(task.getProject() != null ? task.getProject().getId() : null)
                 .createdAt(task.getCreatedAt().format(formatter))
                 .updatedAt(task.getUpdatedAt() != null ? task.getUpdatedAt().format(formatter) : null)
                 .build();

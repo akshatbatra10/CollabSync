@@ -32,8 +32,9 @@ public class Task {
     @Column(nullable = false)
     private TaskStatus status;
 
-    @Column(nullable = false)
-    private Integer projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @Column(nullable = false)
     private String createdBy;
