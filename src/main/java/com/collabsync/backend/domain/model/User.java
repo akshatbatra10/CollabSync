@@ -1,5 +1,6 @@
 package com.collabsync.backend.domain.model;
 
+import com.collabsync.backend.common.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,10 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     private LocalDateTime createdAt;
 

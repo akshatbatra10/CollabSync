@@ -1,6 +1,7 @@
 package com.collabsync.backend.security;
 
 import com.collabsync.backend.config.JwtConfigProperties;
+import com.collabsync.backend.domain.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -18,9 +19,10 @@ public class JwtService {
 
     private final JwtConfigProperties jwtConfigProperties;
 
-    public String generateToken(String username) {
+    public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(user.getUsername())
+                .claim("role", user.getRole().name())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtConfigProperties.getExpiration()))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
@@ -46,7 +48,7 @@ public class JwtService {
         return parseClaims(token).getExpiration().before(new Date());
     }
 
-    private Claims parseClaims(String token) {
+    public Claims parseClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()

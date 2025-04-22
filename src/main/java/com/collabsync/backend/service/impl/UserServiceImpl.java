@@ -4,6 +4,7 @@ import com.collabsync.backend.common.dto.user.UserLoginRequestDto;
 import com.collabsync.backend.common.dto.user.UserLoginResponseDto;
 import com.collabsync.backend.common.dto.user.UserResponseDto;
 import com.collabsync.backend.common.dto.user.UserSignupRequestDto;
+import com.collabsync.backend.common.enums.Role;
 import com.collabsync.backend.common.exceptions.DuplicateUserException;
 import com.collabsync.backend.common.exceptions.InvalidCredentialsException;
 import com.collabsync.backend.domain.model.User;
@@ -43,6 +44,7 @@ public class UserServiceImpl implements UserService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(encodedPassword)
+                .role(Role.ROLE_USER)
                 .build();
 
         log.info("Creating user: {}", user);
@@ -63,7 +65,7 @@ public class UserServiceImpl implements UserService {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
-        String token = jwtService.generateToken(user.getUsername());
+        String token = jwtService.generateToken(user);
 
         return new UserLoginResponseDto("Login successful", token);
     }

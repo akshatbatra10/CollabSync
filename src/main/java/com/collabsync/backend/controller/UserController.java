@@ -7,12 +7,14 @@ import com.collabsync.backend.common.dto.user.UserSignupRequestDto;
 import com.collabsync.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class UserController {
     public String currentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
+        log.info("user: {}", auth);
         WebAuthenticationDetails details = (WebAuthenticationDetails) auth.getDetails();
 
         return "User: " + username + ", IP: " + details.getRemoteAddress();
