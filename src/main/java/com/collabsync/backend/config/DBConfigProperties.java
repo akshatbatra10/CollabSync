@@ -1,13 +1,15 @@
 package com.collabsync.backend.config;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@Data
+@Getter
+@Setter
 @Component
 @ConfigurationProperties(prefix = "spring.datasource")
-public class AppConfigDB {
+public class DBConfigProperties {
 
     private String url;
     private String username;

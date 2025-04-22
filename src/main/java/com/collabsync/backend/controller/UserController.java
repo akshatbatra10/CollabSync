@@ -8,10 +8,10 @@ import com.collabsync.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -31,4 +31,14 @@ public class UserController {
         UserLoginResponseDto userLoginResponseDto = userService.loginUser(request);
         return ResponseEntity.ok(userLoginResponseDto);
     }
+
+    @GetMapping("/me")
+    public String currentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        WebAuthenticationDetails details = (WebAuthenticationDetails) auth.getDetails();
+
+        return "User: " + username + ", IP: " + details.getRemoteAddress();
+    }
+
 }
