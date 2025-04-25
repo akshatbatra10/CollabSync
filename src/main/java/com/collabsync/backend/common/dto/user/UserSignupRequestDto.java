@@ -2,10 +2,11 @@ package com.collabsync.backend.common.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class UserSignupRequestDto {
 
@@ -22,3 +23,5 @@ public class UserSignupRequestDto {
     @NotBlank(message = "Password is required")
     private String password;
 }
+
+
