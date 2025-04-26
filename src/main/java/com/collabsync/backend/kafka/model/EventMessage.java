@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EventMessage {
     private String eventType;
-    private Integer entityId;
-    private String createdBy;
+    private String entityId;
+    private String entityType;
+    private String actor;
     private LocalDateTime createdAt;
+    private String message;
 }

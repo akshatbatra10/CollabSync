@@ -10,6 +10,7 @@ import com.collabsync.backend.kafka.producer.EventPublisher;
 import com.collabsync.backend.repository.CommentRepository;
 import com.collabsync.backend.repository.TaskRepository;
 import com.collabsync.backend.service.CommentService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class CommentServiceImpl implements CommentService {
     private final EventPublisher eventPublisher;
 
     @Override
+    @Transactional
     public CommentResponseDto createComment(CommentRequestDto request, String createdBy) {
         Task task = taskRepository.findById(request.getTaskId())
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + request.getTaskId()));
@@ -39,10 +41,12 @@ public class CommentServiceImpl implements CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         eventPublisher.publish("comment-events", EventMessage.builder()
-                .eventType("comment.created")
-                .entityId(savedComment.getId())
-                .createdBy(savedComment.getCreatedBy())
+                .eventType("COMMENT_CREATED")
+                .entityId(String.valueOf(savedComment.getId()))
+                .actor(savedComment.getCreatedBy())
+                .entityType("Comment")
                 .createdAt(LocalDateTime.now())
+                .message("New Comment added to task ID: " + task.getId())
                 .build()
         );
 
