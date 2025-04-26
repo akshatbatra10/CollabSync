@@ -5,7 +5,8 @@ import com.collabsync.backend.common.dto.comment.CommentResponseDto;
 import com.collabsync.backend.common.exceptions.ResourceNotFoundException;
 import com.collabsync.backend.domain.model.Comment;
 import com.collabsync.backend.domain.model.Task;
-import com.collabsync.backend.kafka.model.EventMessage;
+import com.collabsync.backend.kafka.model.BaseEvent;
+import com.collabsync.backend.kafka.model.EventType;
 import com.collabsync.backend.kafka.producer.EventPublisher;
 import com.collabsync.backend.repository.CommentRepository;
 import com.collabsync.backend.repository.TaskRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -40,15 +42,18 @@ public class CommentServiceImpl implements CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        eventPublisher.publish("comment-events", EventMessage.builder()
-                .eventType("COMMENT_CREATED")
-                .entityId(String.valueOf(savedComment.getId()))
-                .actor(savedComment.getCreatedBy())
-                .entityType("Comment")
-                .createdAt(LocalDateTime.now())
-                .message("New Comment added to task ID: " + task.getId())
-                .build()
-        );
+        Map<String, Object> payload = Map.of("commentId", savedComment.getId(),
+                "taskId", savedComment.getTask().getId(),
+                "createdBy", savedComment.getCreatedBy(),
+                "content", savedComment.getContent());
+
+        BaseEvent baseEvent = BaseEvent.builder()
+                .eventType(EventType.COMMENT_CREATED)
+                .timestamp(LocalDateTime.now())
+                .payload(payload)
+                .build();
+
+        eventPublisher.publish("comment-events", baseEvent);
 
         return mapToDto(savedComment);
     }

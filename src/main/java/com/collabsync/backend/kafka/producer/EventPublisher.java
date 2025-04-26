@@ -1,6 +1,6 @@
 package com.collabsync.backend.kafka.producer;
 
-import com.collabsync.backend.kafka.model.EventMessage;
+import com.collabsync.backend.kafka.model.BaseEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +16,9 @@ public class EventPublisher {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public void publish(String topic, EventMessage eventMessage) {
+    public void publish(String topic, BaseEvent event) {
         try {
-            String message = objectMapper.writeValueAsString(eventMessage);
+            String message = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(topic, message);
             log.info("Publishing message: {}", message);
         } catch (JsonProcessingException e) {

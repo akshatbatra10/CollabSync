@@ -11,6 +11,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
   output:
     ansi:
@@ -22,3 +24,7 @@ server:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+logging:
+  level:
+    org.springframework.boot.context.config: DEBUG
