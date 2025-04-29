@@ -5,6 +5,7 @@ import com.collabsync.backend.common.dto.comment.CommentResponseDto;
 import com.collabsync.backend.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +27,7 @@ public class CommentController {
 
         CommentResponseDto comment = commentService.createComment(request, createdBy);
 
-        return ResponseEntity.ok(comment);
+        return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/task/{taskId}")

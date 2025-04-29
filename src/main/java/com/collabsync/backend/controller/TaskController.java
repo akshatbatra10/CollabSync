@@ -5,6 +5,7 @@ import com.collabsync.backend.common.dto.task.TaskResponseDto;
 import com.collabsync.backend.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +27,7 @@ public class TaskController {
 
         TaskResponseDto task = taskService.createTask(request, createdBy);
 
-        return ResponseEntity.ok(task);
+        return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/project/{projectId}")

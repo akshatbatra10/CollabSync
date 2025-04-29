@@ -2,11 +2,7 @@ package com.collabsync.backend.domain.model;
 
 import com.collabsync.backend.common.enums.TaskStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Service;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "tasks")
 @Getter
-@Service
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
