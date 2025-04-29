@@ -5,6 +5,7 @@ import com.collabsync.backend.common.dto.user.UserLoginResponseDto;
 import com.collabsync.backend.common.dto.user.UserResponseDto;
 import com.collabsync.backend.common.dto.user.UserSignupRequestDto;
 import com.collabsync.backend.common.exceptions.DuplicateUserException;
+import com.collabsync.backend.common.exceptions.InvalidCredentialsException;
 import com.collabsync.backend.domain.model.User;
 import com.collabsync.backend.repository.UserRepository;
 import com.collabsync.backend.security.JwtService;
@@ -14,8 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,5 +82,23 @@ public class UserServiceImplTest {
 
         assertEquals("Login successful", response.getMessage());
         assertEquals("token", response.getToken());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFound() {
+        UserLoginRequestDto request = new UserLoginRequestDto("unknown@email", "password");
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(java.util.Optional.empty());
+
+        assertThrows(InvalidCredentialsException.class, () -> userService.loginUser(request));
+    }
+
+    @Test
+    void shouldReturnOptionalUserForFindByEmail() {
+        User user = new User();
+        when(userRepository.findByEmail("a.gmail.com")).thenReturn(java.util.Optional.of(user));
+
+        Optional<User> result = userService.findByEmail("a.gmail.com");
+
+        assertTrue(result.isPresent());
     }
 }
