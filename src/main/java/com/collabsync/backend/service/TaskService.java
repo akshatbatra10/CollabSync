@@ -10,4 +10,6 @@ public interface TaskService {
     TaskResponseDto createTask(TaskRequestDto task);
 
     List<TaskResponseDto> getTasksByProjectId(Integer projectId);
+
+    void assignTask(Integer taskId, String username);
 }

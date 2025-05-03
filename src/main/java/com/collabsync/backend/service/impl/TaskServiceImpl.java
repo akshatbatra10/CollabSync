@@ -13,6 +13,7 @@ import com.collabsync.backend.repository.TaskRepository;
 import com.collabsync.backend.service.TaskService;
 import com.collabsync.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
@@ -69,6 +71,26 @@ public class TaskServiceImpl implements TaskService {
                 .stream()
                 .map(this::mapToDto)
                 .toList();
+    }
+
+    @Override
+    public void assignTask(Integer taskId, String username) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
+
+        User assignedUser = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        log.info("Assigning task {} to user {}", taskId, username);
+        boolean isCollaborator = task.getProject().getMembers().stream()
+                .anyMatch(member -> member.getId().equals(assignedUser.getId()));
+
+        if (!isCollaborator) {
+            throw new ResourceNotFoundException("User is not a collaborator");
+        }
+
+        task.setAssignedTo(assignedUser);
+        taskRepository.save(task);
     }
 
     private TaskResponseDto mapToDto(Task task) {

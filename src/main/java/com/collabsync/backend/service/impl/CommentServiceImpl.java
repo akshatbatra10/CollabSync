@@ -6,6 +6,7 @@ import com.collabsync.backend.common.exceptions.ResourceNotFoundException;
 import com.collabsync.backend.domain.model.Comment;
 import com.collabsync.backend.domain.model.Task;
 import com.collabsync.backend.kafka.model.BaseEvent;
+import com.collabsync.backend.kafka.model.CommentCreatedEvent;
 import com.collabsync.backend.kafka.model.EventType;
 import com.collabsync.backend.kafka.producer.EventPublisher;
 import com.collabsync.backend.repository.CommentRepository;
@@ -28,6 +29,7 @@ public class CommentServiceImpl implements CommentService {
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
     private final EventPublisher eventPublisher;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     @Transactional
@@ -44,15 +46,18 @@ public class CommentServiceImpl implements CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        Map<String, Object> payload = Map.of("commentId", savedComment.getId(),
-                "taskId", savedComment.getTask().getId(),
-                "createdBy", savedComment.getCreatedBy(),
-                "content", savedComment.getContent());
+        CommentCreatedEvent commentCreatedEvent = CommentCreatedEvent.builder()
+                .commentId(savedComment.getId())
+                .taskId(task.getId())
+                .createdBy(createdBy)
+                .content(savedComment.getContent())
+                .recipientId(task.getAssignedTo() != null ? task.getAssignedTo().getId() : null)
+                .build();
 
-        BaseEvent baseEvent = BaseEvent.builder()
+        BaseEvent<CommentCreatedEvent> baseEvent = BaseEvent.<CommentCreatedEvent>builder()
                 .eventType(EventType.COMMENT_CREATED)
                 .timestamp(LocalDateTime.now())
-                .payload(payload)
+                .payload(commentCreatedEvent)
                 .build();
 
         eventPublisher.publish("comment-events", baseEvent);
@@ -70,7 +75,6 @@ public class CommentServiceImpl implements CommentService {
 
 
     private CommentResponseDto mapToDto(Comment comment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return CommentResponseDto.builder()
                 .id(comment.getId())

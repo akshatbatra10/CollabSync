@@ -1,6 +1,7 @@
 package com.collabsync.backend.domain.model;
 
 import com.collabsync.backend.common.enums.NotificationStatus;
+import com.collabsync.backend.kafka.model.EventType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,6 +26,9 @@ public class Notification {
 
     private Integer projectId;
 
+    @Column(nullable = false)
+    private Integer recipientId;
+
     private String createdBy;
 
     @Column(nullable = false)
@@ -33,6 +37,10 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventType type;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

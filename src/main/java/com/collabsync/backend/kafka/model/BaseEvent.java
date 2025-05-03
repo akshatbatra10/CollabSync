@@ -12,9 +12,9 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaseEvent {
+public class BaseEvent<T> {
 
     private EventType eventType;
     private LocalDateTime timestamp;
-    private Map<String, Object> payload;
+    private T payload;
 }

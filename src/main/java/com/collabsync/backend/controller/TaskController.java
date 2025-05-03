@@ -4,6 +4,7 @@ import com.collabsync.backend.common.dto.task.TaskRequestDto;
 import com.collabsync.backend.common.dto.task.TaskResponseDto;
 import com.collabsync.backend.service.TaskService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,6 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<TaskResponseDto> createTask(@RequestBody @Valid TaskRequestDto request) {
         TaskResponseDto task = taskService.createTask(request);
-
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
@@ -31,5 +31,11 @@ public class TaskController {
     public ResponseEntity<List<TaskResponseDto>> getTasksByProjectId(@PathVariable Integer projectId) {
         List<TaskResponseDto> tasks = taskService.getTasksByProjectId(projectId);
         return ResponseEntity.ok(tasks);
+    }
+
+    @PostMapping(value = "/{taskId}/assign")
+    public ResponseEntity<String> assignTask(@PathVariable Integer taskId, @RequestParam @NotBlank String username) {
+        taskService.assignTask(taskId, username);
+        return new ResponseEntity<>("Task assigned", HttpStatus.NO_CONTENT);
     }
 }

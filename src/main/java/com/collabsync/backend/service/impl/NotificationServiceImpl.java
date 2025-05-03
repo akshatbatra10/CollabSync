@@ -2,10 +2,14 @@ package com.collabsync.backend.service.impl;
 
 import com.collabsync.backend.common.dto.notification.NotificationResponseDto;
 import com.collabsync.backend.common.enums.NotificationStatus;
+import com.collabsync.backend.common.enums.NotificationType;
 import com.collabsync.backend.domain.model.Notification;
 import com.collabsync.backend.kafka.model.BaseEvent;
+import com.collabsync.backend.kafka.model.CommentCreatedEvent;
+import com.collabsync.backend.kafka.model.EventType;
 import com.collabsync.backend.repository.NotificationRepository;
 import com.collabsync.backend.service.NotificationService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,19 +23,33 @@ import java.util.List;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
-    public void createNotification(BaseEvent event) {
-        Notification notification = Notification.builder()
-                .taskId((Integer) event.getPayload().get("taskId"))
-                .content((String) event.getPayload().get("content"))
-                .createdBy((String) event.getPayload().get("createdBy"))
-                .status(NotificationStatus.UNREAD)
-                .build();
+    public void createNotification(BaseEvent<?> event) {
 
-        Notification savedNotification = notificationRepository.save(notification);
-        log.info("Saved notification: {}", savedNotification);
+        if (event.getEventType() == EventType.COMMENT_CREATED) {
+            CommentCreatedEvent payload = objectMapper.convertValue(event.getPayload(), CommentCreatedEvent.class);
+
+            if (payload.getRecipientId() == null) {
+                log.info("No recipient found for comment event: {}", payload);
+                return;
+            }
+
+            Notification notification = Notification.builder()
+                    .taskId(payload.getTaskId())
+                    .recipientId(payload.getRecipientId())
+                    .content(payload.getContent())
+                    .createdBy(payload.getCreatedBy())
+                    .status(NotificationStatus.UNREAD)
+                    .type(EventType.COMMENT_CREATED)
+                    .build();
+
+            Notification savedNotification = notificationRepository.save(notification);
+            log.info("Saved notification: {}", savedNotification);
+        }
+
     }
 
 //    @Override

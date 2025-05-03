@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface NotificationService {
 
-    void createNotification(BaseEvent event);
+    void createNotification(BaseEvent<?> event);
 
 //    List<NotificationResponseDto> getNotificationsByUserId(Integer userId);
 
