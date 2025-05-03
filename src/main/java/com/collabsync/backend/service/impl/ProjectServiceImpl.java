@@ -1,5 +1,6 @@
 package com.collabsync.backend.service.impl;
 
+import com.collabsync.backend.common.dto.project.CollaboratorResponseDto;
 import com.collabsync.backend.common.dto.project.ProjectRequestDto;
 import com.collabsync.backend.common.dto.project.ProjectResponseDto;
 import com.collabsync.backend.common.dto.user.UserResponseDto;
@@ -14,12 +15,13 @@ import com.collabsync.backend.repository.ProjectRepository;
 import com.collabsync.backend.service.ProjectService;
 import com.collabsync.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -78,8 +80,18 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private ProjectResponseDto mapToDto(Project project) {
-
         User projectOwner = project.getOwner();
+
+        List<CollaboratorResponseDto> collaborators = Optional.ofNullable(project.getMembers()).orElse(Collections.emptyList())
+                .stream()
+                .map(member -> CollaboratorResponseDto.builder()
+                        .id(member.getUser().getId())
+                        .username(member.getUser().getUsername())
+                        .email(member.getUser().getEmail())
+                        .fullName(member.getUser().getFullName())
+                        .role(member.getRole().name())
+                        .build())
+                .toList();
 
         return ProjectResponseDto.builder()
                 .id(project.getId())
@@ -93,6 +105,7 @@ public class ProjectServiceImpl implements ProjectService {
                         .build())
                 .createdAt(project.getCreatedAt().format(formatter))
                 .updatedAt(project.getUpdatedAt() != null ? project.getUpdatedAt().format(formatter) : null)
+                .collaborators(collaborators)
                 .build();
     }
 }

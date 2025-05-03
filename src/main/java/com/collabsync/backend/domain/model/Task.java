@@ -1,5 +1,6 @@
 package com.collabsync.backend.domain.model;
 
+import com.collabsync.backend.common.enums.TaskPriority;
 import com.collabsync.backend.common.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,6 +29,14 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskPriority priority;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_to_id")
+    private User assignedTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)

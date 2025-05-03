@@ -6,6 +6,7 @@ import com.collabsync.backend.service.ProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,8 +35,6 @@ public class ProjectController {
     @PostMapping("/{projectId}/collaborators")
     public ResponseEntity<String> addCollaborator(@PathVariable Integer projectId, @RequestParam @NotBlank String username) {
         projectService.addCollaborator(projectId, username);
-        return ResponseEntity.ok("Collaborator added");
+        return new ResponseEntity<>("Collaborator added", HttpStatus.NO_CONTENT);
     }
-
-
 }

@@ -1,5 +1,6 @@
 package com.collabsync.backend.service;
 
+import com.collabsync.backend.common.dto.project.CollaboratorResponseDto;
 import com.collabsync.backend.common.dto.project.ProjectRequestDto;
 import com.collabsync.backend.common.dto.project.ProjectResponseDto;
 

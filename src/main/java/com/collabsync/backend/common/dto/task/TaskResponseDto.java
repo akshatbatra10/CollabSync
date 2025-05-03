@@ -14,6 +14,8 @@ public class TaskResponseDto {
     private String title;
     private String description;
     private TaskStatus status;
+    private String priority;
+    private String assignedTo;
     private Integer projectId;
     private String createdBy;
     private String createdAt;

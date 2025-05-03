@@ -38,6 +38,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectMember> projectMembers;
 
+    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL)
+    private List<Task> tasks;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
