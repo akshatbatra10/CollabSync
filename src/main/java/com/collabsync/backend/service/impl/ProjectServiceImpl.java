@@ -27,7 +27,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = Project.builder()
                 .name(request.getName())
                 .description(request.getDescription())
-                .user(currentUser)
+                .owner(currentUser)
                 .build();
 
         Project savedProject = projectRepository.save(project);
@@ -49,7 +49,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .id(project.getId())
                 .name(project.getName())
                 .description(project.getDescription())
-                .user(project.getUser())
+                .user(project.getOwner())
                 .createdAt(project.getCreatedAt().format(formatter))
                 .updatedAt(project.getUpdatedAt() != null ? project.getUpdatedAt().format(formatter) : null)
                 .build();
