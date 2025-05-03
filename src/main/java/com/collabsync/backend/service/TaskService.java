@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface TaskService {
 
-    TaskResponseDto createTask(TaskRequestDto task, String createdBy);
+    TaskResponseDto createTask(TaskRequestDto task);
 
     List<TaskResponseDto> getTasksByProjectId(Integer projectId);
 }

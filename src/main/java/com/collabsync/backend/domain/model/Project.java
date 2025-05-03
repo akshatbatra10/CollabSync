@@ -24,8 +24,9 @@ public class Project {
 
     private String description;
 
-    @Column(nullable = false)
-    private String createdBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

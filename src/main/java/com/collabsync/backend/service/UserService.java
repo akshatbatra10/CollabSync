@@ -15,4 +15,6 @@ public interface UserService {
     Optional<User> findByEmail(String email);
 
     UserLoginResponseDto loginUser(UserLoginRequestDto request);
+
+    User getCurrentlyLoggedInUser();
 }

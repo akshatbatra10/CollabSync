@@ -11,6 +11,7 @@ import com.collabsync.backend.repository.UserRepository;
 import com.collabsync.backend.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,11 +27,12 @@ public class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private UserServiceImpl userService;
-    @Mock
     private JwtService jwtService;
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private UserServiceImpl userService;
 
     @Test
     public void shouldCreateUserSuccessfully() {

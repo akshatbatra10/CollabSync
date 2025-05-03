@@ -22,10 +22,7 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<TaskResponseDto> createTask(@RequestBody @Valid TaskRequestDto request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String createdBy = authentication.getName();
-
-        TaskResponseDto task = taskService.createTask(request, createdBy);
+        TaskResponseDto task = taskService.createTask(request);
 
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }

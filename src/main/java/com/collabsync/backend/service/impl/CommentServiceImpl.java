@@ -13,6 +13,7 @@ import com.collabsync.backend.repository.TaskRepository;
 import com.collabsync.backend.service.CommentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponseDto createComment(CommentRequestDto request, String createdBy) {
+    public CommentResponseDto createComment(CommentRequestDto request) {
+        String createdBy = SecurityContextHolder.getContext().getAuthentication().getName();
         Task task = taskRepository.findById(request.getTaskId())
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + request.getTaskId()));
 

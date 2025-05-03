@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface CommentService {
 
-    CommentResponseDto createComment(CommentRequestDto comment, String createdBy);
+    CommentResponseDto createComment(CommentRequestDto comment);
 
     List<CommentResponseDto> getCommentsByTaskId(Integer taskId);
 }

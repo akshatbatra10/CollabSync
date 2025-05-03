@@ -22,10 +22,8 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentResponseDto> createComment(@RequestBody @Valid CommentRequestDto request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String createdBy = authentication.getName();
 
-        CommentResponseDto comment = commentService.createComment(request, createdBy);
+        CommentResponseDto comment = commentService.createComment(request);
 
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }

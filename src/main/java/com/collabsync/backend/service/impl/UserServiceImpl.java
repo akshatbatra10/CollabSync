@@ -13,6 +13,7 @@ import com.collabsync.backend.security.JwtService;
 import com.collabsync.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -68,6 +69,13 @@ public class UserServiceImpl implements UserService {
         String token = jwtService.generateToken(user);
 
         return new UserLoginResponseDto("Login successful", token);
+    }
+
+    @Override
+    public User getCurrentlyLoggedInUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
     }
 
     @Override
