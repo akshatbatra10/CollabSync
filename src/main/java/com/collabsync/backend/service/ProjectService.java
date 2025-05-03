@@ -10,4 +10,6 @@ public interface ProjectService {
     ProjectResponseDto createProject(ProjectRequestDto project);
 
     List<ProjectResponseDto> getProjects();
+
+    void addCollaborator(Integer projectId, String username);
 }

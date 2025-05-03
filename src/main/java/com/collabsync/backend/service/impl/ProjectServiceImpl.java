@@ -2,14 +2,22 @@ package com.collabsync.backend.service.impl;
 
 import com.collabsync.backend.common.dto.project.ProjectRequestDto;
 import com.collabsync.backend.common.dto.project.ProjectResponseDto;
+import com.collabsync.backend.common.dto.user.UserResponseDto;
+import com.collabsync.backend.common.enums.ProjectRole;
+import com.collabsync.backend.common.exceptions.DuplicateUserException;
+import com.collabsync.backend.common.exceptions.InvalidCredentialsException;
+import com.collabsync.backend.common.exceptions.ResourceNotFoundException;
 import com.collabsync.backend.domain.model.Project;
+import com.collabsync.backend.domain.model.ProjectMember;
 import com.collabsync.backend.domain.model.User;
 import com.collabsync.backend.repository.ProjectRepository;
 import com.collabsync.backend.service.ProjectService;
 import com.collabsync.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -43,13 +51,46 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
+    @Override
+    public void addCollaborator(Integer projectId, String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        boolean alreadyExists = project.getMembers().stream()
+                .anyMatch(member -> member.getId().equals(user.getId()));
+
+        if (alreadyExists) {
+            throw new DuplicateUserException("User already exists in project");
+        }
+
+        ProjectMember projectMember = ProjectMember.builder()
+                .project(project)
+                .user(user)
+                .role(ProjectRole.CONTRIBUTOR)
+                .joinedAt(LocalDateTime.now())
+                .build();
+
+        project.getMembers().add(projectMember);
+        projectRepository.save(project);
+    }
+
     private ProjectResponseDto mapToDto(Project project) {
+
+        User projectOwner = project.getOwner();
 
         return ProjectResponseDto.builder()
                 .id(project.getId())
                 .name(project.getName())
                 .description(project.getDescription())
-                .user(project.getOwner())
+                .user(UserResponseDto.builder()
+                        .id(projectOwner.getId())
+                        .username(projectOwner.getUsername())
+                        .email(projectOwner.getEmail())
+                        .fullName(projectOwner.getFullName())
+                        .build())
                 .createdAt(project.getCreatedAt().format(formatter))
                 .updatedAt(project.getUpdatedAt() != null ? project.getUpdatedAt().format(formatter) : null)
                 .build();

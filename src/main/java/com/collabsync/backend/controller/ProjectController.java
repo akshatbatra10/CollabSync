@@ -4,6 +4,7 @@ import com.collabsync.backend.common.dto.project.ProjectRequestDto;
 import com.collabsync.backend.common.dto.project.ProjectResponseDto;
 import com.collabsync.backend.service.ProjectService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,4 +30,12 @@ public class ProjectController {
         List<ProjectResponseDto> projects = projectService.getProjects();
         return ResponseEntity.ok(projects);
     }
+
+    @PostMapping("/{projectId}/collaborators")
+    public ResponseEntity<String> addCollaborator(@PathVariable Integer projectId, @RequestParam @NotBlank String username) {
+        projectService.addCollaborator(projectId, username);
+        return ResponseEntity.ok("Collaborator added");
+    }
+
+
 }
