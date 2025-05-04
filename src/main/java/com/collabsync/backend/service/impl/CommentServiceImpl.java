@@ -7,7 +7,7 @@ import com.collabsync.backend.domain.model.Comment;
 import com.collabsync.backend.domain.model.Task;
 import com.collabsync.backend.kafka.model.BaseEvent;
 import com.collabsync.backend.kafka.model.CommentCreatedEvent;
-import com.collabsync.backend.kafka.model.EventType;
+import com.collabsync.backend.kafka.enums.EventType;
 import com.collabsync.backend.kafka.producer.EventPublisher;
 import com.collabsync.backend.repository.CommentRepository;
 import com.collabsync.backend.repository.TaskRepository;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

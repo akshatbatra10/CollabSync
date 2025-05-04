@@ -11,9 +11,15 @@ import com.collabsync.backend.common.exceptions.ResourceNotFoundException;
 import com.collabsync.backend.domain.model.Project;
 import com.collabsync.backend.domain.model.ProjectMember;
 import com.collabsync.backend.domain.model.User;
+import com.collabsync.backend.kafka.enums.ChangeType;
+import com.collabsync.backend.kafka.model.BaseEvent;
+import com.collabsync.backend.kafka.enums.EventType;
+import com.collabsync.backend.kafka.model.CollabUserChangedEvent;
+import com.collabsync.backend.kafka.producer.EventPublisher;
 import com.collabsync.backend.repository.ProjectRepository;
 import com.collabsync.backend.service.ProjectService;
 import com.collabsync.backend.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +35,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserService userService;
+    private final EventPublisher eventPublisher;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
+    @Transactional
     public ProjectResponseDto createProject(ProjectRequestDto request) {
         User currentUser = userService.getCurrentlyLoggedInUser();
         Project project = Project.builder()
@@ -54,7 +62,19 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void addCollaborator(Integer projectId, String username) {
+    @Transactional
+    public void addOrRemoveCollaborator(Integer projectId, String username, String action) {
+        ChangeType changeType;
+        try {
+            changeType = ChangeType.valueOf(action.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidCredentialsException("Invalid action");
+        }
+
+        if (changeType != ChangeType.ADD && changeType != ChangeType.REMOVE) {
+            throw new InvalidCredentialsException("Invalid action");
+        }
+
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
@@ -64,19 +84,44 @@ public class ProjectServiceImpl implements ProjectService {
         boolean alreadyExists = project.getMembers().stream()
                 .anyMatch(member -> member.getId().equals(user.getId()));
 
-        if (alreadyExists) {
+        if (alreadyExists && changeType == ChangeType.ADD) {
             throw new DuplicateUserException("User already exists in project");
         }
 
-        ProjectMember projectMember = ProjectMember.builder()
-                .project(project)
-                .user(user)
+        if (!alreadyExists && changeType == ChangeType.REMOVE) {
+            throw new DuplicateUserException("User does not exists in project");
+        }
+
+        if (changeType == ChangeType.ADD) {
+            ProjectMember projectMember = ProjectMember.builder()
+                    .project(project)
+                    .user(user)
+                    .role(ProjectRole.CONTRIBUTOR)
+                    .joinedAt(LocalDateTime.now())
+                    .build();
+
+            project.getMembers().add(projectMember);
+            projectRepository.save(project);
+        } else {
+            project.getMembers().removeIf(member -> member.getId().equals(user.getId()));
+            projectRepository.save(project);
+        }
+
+        CollabUserChangedEvent collabUserChangedEvent = CollabUserChangedEvent.builder()
+                .userId(user.getId())
+                .projectId(project.getId())
+                .changeType(changeType)
                 .role(ProjectRole.CONTRIBUTOR)
-                .joinedAt(LocalDateTime.now())
+                .recipientId(user.getId())
                 .build();
 
-        project.getMembers().add(projectMember);
-        projectRepository.save(project);
+        BaseEvent<CollabUserChangedEvent> baseEvent = BaseEvent.<CollabUserChangedEvent>builder()
+                .eventType(EventType.COLLAB_USER_CHANGED)
+                .timestamp(LocalDateTime.now())
+                .payload(collabUserChangedEvent)
+                .build();
+
+        eventPublisher.publish("project-events", baseEvent);
     }
 
     private ProjectResponseDto mapToDto(Project project) {
@@ -89,7 +134,7 @@ public class ProjectServiceImpl implements ProjectService {
                         .username(member.getUser().getUsername())
                         .email(member.getUser().getEmail())
                         .fullName(member.getUser().getFullName())
-                        .role(member.getRole().name())
+                        .role(member.getRole())
                         .build())
                 .toList();
 

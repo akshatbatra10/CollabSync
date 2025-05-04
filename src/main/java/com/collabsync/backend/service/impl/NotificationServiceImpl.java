@@ -1,12 +1,10 @@
 package com.collabsync.backend.service.impl;
 
-import com.collabsync.backend.common.dto.notification.NotificationResponseDto;
 import com.collabsync.backend.common.enums.NotificationStatus;
-import com.collabsync.backend.common.enums.NotificationType;
 import com.collabsync.backend.domain.model.Notification;
 import com.collabsync.backend.kafka.model.BaseEvent;
 import com.collabsync.backend.kafka.model.CommentCreatedEvent;
-import com.collabsync.backend.kafka.model.EventType;
+import com.collabsync.backend.kafka.enums.EventType;
 import com.collabsync.backend.repository.NotificationRepository;
 import com.collabsync.backend.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +12,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @Service

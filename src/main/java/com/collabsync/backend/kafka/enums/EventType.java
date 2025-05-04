@@ -1,4 +1,4 @@
-package com.collabsync.backend.kafka.model;
+package com.collabsync.backend.kafka.enums;
 
 public enum EventType {
     TASK_CREATED,
@@ -10,6 +10,7 @@ public enum EventType {
     COMMENT_CREATED,
     COMMENT_UPDATED,
     COMMENT_DELETED,
+    COLLAB_USER_CHANGED,
     TASK_ASSIGNED,
     USER_MENTIONED,
 }

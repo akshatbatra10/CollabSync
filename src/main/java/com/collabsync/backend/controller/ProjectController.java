@@ -33,8 +33,10 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/collaborators")
-    public ResponseEntity<String> addCollaborator(@PathVariable Integer projectId, @RequestParam @NotBlank String username) {
-        projectService.addCollaborator(projectId, username);
+    public ResponseEntity<String> addCollaborator(@PathVariable Integer projectId,
+                                                  @RequestParam @NotBlank String username,
+                                                  @RequestParam @NotBlank String action) {
+        projectService.addOrRemoveCollaborator(projectId, username, action);
         return new ResponseEntity<>("Collaborator added", HttpStatus.NO_CONTENT);
     }
 }
