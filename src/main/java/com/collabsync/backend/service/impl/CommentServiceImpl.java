@@ -7,7 +7,7 @@ import com.collabsync.backend.domain.model.Comment;
 import com.collabsync.backend.domain.model.Task;
 import com.collabsync.backend.kafka.model.BaseEvent;
 import com.collabsync.backend.kafka.model.CommentCreatedEvent;
-import com.collabsync.backend.kafka.enums.EventType;
+import com.collabsync.backend.common.enums.EventType;
 import com.collabsync.backend.kafka.producer.EventPublisher;
 import com.collabsync.backend.repository.CommentRepository;
 import com.collabsync.backend.repository.TaskRepository;

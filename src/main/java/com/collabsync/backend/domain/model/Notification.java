@@ -1,7 +1,7 @@
 package com.collabsync.backend.domain.model;
 
 import com.collabsync.backend.common.enums.NotificationStatus;
-import com.collabsync.backend.kafka.enums.EventType;
+import com.collabsync.backend.common.enums.EventType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

@@ -1,7 +1,7 @@
 package com.collabsync.backend.kafka.model;
 
 import com.collabsync.backend.common.enums.ProjectRole;
-import com.collabsync.backend.kafka.enums.ChangeType;
+import com.collabsync.backend.common.enums.ChangeType;
 import lombok.*;
 
 @Getter

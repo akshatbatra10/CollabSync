@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -42,8 +43,9 @@ public class Task {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @Builder.Default
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     @Column(nullable = false)
     private String createdBy;

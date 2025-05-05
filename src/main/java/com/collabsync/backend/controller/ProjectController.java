@@ -1,5 +1,6 @@
 package com.collabsync.backend.controller;
 
+import com.collabsync.backend.common.dto.project.CollaboratorResponseDto;
 import com.collabsync.backend.common.dto.project.ProjectRequestDto;
 import com.collabsync.backend.common.dto.project.ProjectResponseDto;
 import com.collabsync.backend.service.ProjectService;
@@ -32,11 +33,31 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
-    @PostMapping("/{projectId}/collaborators")
-    public ResponseEntity<String> addCollaborator(@PathVariable Integer projectId,
+    @PutMapping("/{projectId}")
+    public ResponseEntity<ProjectResponseDto> updateProject(@PathVariable Integer projectId,
+                                                           @RequestBody @Valid ProjectRequestDto request) {
+        ProjectResponseDto projectResponseDto = projectService.updateProject(projectId, request);
+
+        return ResponseEntity.ok(projectResponseDto);
+    }
+
+    @DeleteMapping("/{projectId}")
+    public ResponseEntity<?> deleteProject(@PathVariable Integer projectId) {
+        projectService.deleteProject(projectId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{projectId}/collaborators")
+    public ResponseEntity<?> modifyCollaborator(@PathVariable Integer projectId,
                                                   @RequestParam @NotBlank String username,
                                                   @RequestParam @NotBlank String action) {
         projectService.addOrRemoveCollaborator(projectId, username, action);
-        return new ResponseEntity<>("Collaborator added", HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{projectId}/collaborators")
+    public ResponseEntity<List<CollaboratorResponseDto>> getCollaborators(@PathVariable Integer projectId) {
+        List<CollaboratorResponseDto> collaborators = projectService.getCollaborators(projectId);
+        return ResponseEntity.ok(collaborators);
     }
 }

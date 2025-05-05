@@ -2,7 +2,7 @@ package com.collabsync.backend.kafka.consumer;
 
 import com.collabsync.backend.kafka.model.BaseEvent;
 import com.collabsync.backend.kafka.model.CommentCreatedEvent;
-import com.collabsync.backend.kafka.enums.EventType;
+import com.collabsync.backend.common.enums.EventType;
 import com.collabsync.backend.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

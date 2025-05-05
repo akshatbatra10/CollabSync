@@ -1,6 +1,6 @@
 package com.collabsync.backend.kafka.model;
 
-import com.collabsync.backend.kafka.enums.EventType;
+import com.collabsync.backend.common.enums.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

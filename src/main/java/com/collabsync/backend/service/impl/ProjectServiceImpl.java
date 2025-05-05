@@ -11,9 +11,9 @@ import com.collabsync.backend.common.exceptions.ResourceNotFoundException;
 import com.collabsync.backend.domain.model.Project;
 import com.collabsync.backend.domain.model.ProjectMember;
 import com.collabsync.backend.domain.model.User;
-import com.collabsync.backend.kafka.enums.ChangeType;
+import com.collabsync.backend.common.enums.ChangeType;
 import com.collabsync.backend.kafka.model.BaseEvent;
-import com.collabsync.backend.kafka.enums.EventType;
+import com.collabsync.backend.common.enums.EventType;
 import com.collabsync.backend.kafka.model.CollabUserChangedEvent;
 import com.collabsync.backend.kafka.producer.EventPublisher;
 import com.collabsync.backend.repository.ProjectRepository;
@@ -21,12 +21,14 @@ import com.collabsync.backend.service.ProjectService;
 import com.collabsync.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -65,13 +67,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public void addOrRemoveCollaborator(Integer projectId, String username, String action) {
         ChangeType changeType;
+        String loggedInUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
             changeType = ChangeType.valueOf(action.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new InvalidCredentialsException("Invalid action");
-        }
-
-        if (changeType != ChangeType.ADD && changeType != ChangeType.REMOVE) {
             throw new InvalidCredentialsException("Invalid action");
         }
 
@@ -81,8 +80,12 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
+        if (!project.getOwner().getUsername().equals(loggedInUsername)) {
+            throw new InvalidCredentialsException("User is not the owner of the project");
+        }
+
         boolean alreadyExists = project.getMembers().stream()
-                .anyMatch(member -> member.getId().equals(user.getId()));
+                .anyMatch(member -> Objects.equals(member.getId(), user.getId()));
 
         if (alreadyExists && changeType == ChangeType.ADD) {
             throw new DuplicateUserException("User already exists in project");
@@ -103,7 +106,7 @@ public class ProjectServiceImpl implements ProjectService {
             project.getMembers().add(projectMember);
             projectRepository.save(project);
         } else {
-            project.getMembers().removeIf(member -> member.getId().equals(user.getId()));
+            project.getMembers().removeIf(member -> member.getUser().getId().equals(user.getId()));
             projectRepository.save(project);
         }
 
@@ -124,18 +127,56 @@ public class ProjectServiceImpl implements ProjectService {
         eventPublisher.publish("project-events", baseEvent);
     }
 
+    @Override
+    public List<CollaboratorResponseDto> getCollaborators(Integer projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        return project.getMembers().stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    public ProjectResponseDto updateProject(Integer projectId, ProjectRequestDto request) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        project.setName(request.getName() != null ? request.getName() : project.getName());
+        project.setDescription(request.getDescription() != null ? request.getDescription() : project.getDescription());
+
+        Project savedProject = projectRepository.save(project);
+
+        return mapToDto(savedProject);
+    }
+
+    public void deleteProject(Integer projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!project.getOwner().getUsername().equals(username)) {
+            throw new ResourceNotFoundException("User is not the owner of the project");
+        }
+
+        projectRepository.deleteById(projectId);
+    }
+
+    private CollaboratorResponseDto mapToDto(ProjectMember projectMember) {
+        return CollaboratorResponseDto.builder()
+                .id(projectMember.getUser().getId())
+                .username(projectMember.getUser().getUsername())
+                .email(projectMember.getUser().getEmail())
+                .fullName(projectMember.getUser().getFullName())
+                .role(projectMember.getRole())
+                .build();
+    }
+
     private ProjectResponseDto mapToDto(Project project) {
         User projectOwner = project.getOwner();
 
         List<CollaboratorResponseDto> collaborators = Optional.ofNullable(project.getMembers()).orElse(Collections.emptyList())
                 .stream()
-                .map(member -> CollaboratorResponseDto.builder()
-                        .id(member.getUser().getId())
-                        .username(member.getUser().getUsername())
-                        .email(member.getUser().getEmail())
-                        .fullName(member.getUser().getFullName())
-                        .role(member.getRole())
-                        .build())
+                .map(this::mapToDto)
                 .toList();
 
         return ProjectResponseDto.builder()

@@ -13,4 +13,10 @@ public interface ProjectService {
     List<ProjectResponseDto> getProjects();
 
     void addOrRemoveCollaborator(Integer projectId, String username, String action);
+
+    List<CollaboratorResponseDto> getCollaborators(Integer projectId);
+
+    ProjectResponseDto updateProject(Integer projectId, ProjectRequestDto project);
+
+    void deleteProject(Integer projectId);
 }

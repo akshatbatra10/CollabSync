@@ -1,4 +1,4 @@
-package com.collabsync.backend.kafka.enums;
+package com.collabsync.backend.common.enums;
 
 public enum EventType {
     TASK_CREATED,

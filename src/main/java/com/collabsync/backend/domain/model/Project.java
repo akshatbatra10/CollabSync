@@ -29,6 +29,7 @@ public class Project {
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
 
+    @Builder.Default
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectMember> members = new ArrayList<>();
 
@@ -37,8 +38,9 @@ public class Project {
 
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
