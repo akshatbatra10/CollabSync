@@ -3,6 +3,8 @@ package com.collabsync.backend.kafka.consumer;
 import com.collabsync.backend.kafka.model.BaseEvent;
 import com.collabsync.backend.common.enums.EventType;
 import com.collabsync.backend.kafka.model.CollabUserChangedEvent;
+import com.collabsync.backend.kafka.model.ProjectDeleteEvent;
+import com.collabsync.backend.kafka.model.ProjectUpdateEvent;
 import com.collabsync.backend.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,38 @@ public class ProjectEventConsumer {
 
                 BaseEvent<CollabUserChangedEvent> event = BaseEvent.<CollabUserChangedEvent>builder()
                         .eventType(EventType.COLLAB_USER_CHANGED)
+                        .timestamp(eventMessage.getTimestamp())
+                        .payload(payload)
+                        .build();
+
+                notificationService.createNotification(event);
+            } else if (eventMessage.getEventType() == EventType.PROJECT_UPDATED) {
+                ProjectUpdateEvent payload = objectMapper.convertValue(eventMessage.getPayload(), ProjectUpdateEvent.class);
+                log.info("Received project event with payload: {}", payload);
+
+                if (payload.getRecipientId() == null) {
+                    log.info("No recipient found for project event: {}", payload);
+                    return;
+                }
+
+                BaseEvent<ProjectUpdateEvent> event = BaseEvent.<ProjectUpdateEvent>builder()
+                        .eventType(EventType.PROJECT_UPDATED)
+                        .timestamp(eventMessage.getTimestamp())
+                        .payload(payload)
+                        .build();
+
+                notificationService.createNotification(event);
+            } else if (eventMessage.getEventType() == EventType.PROJECT_DELETED) {
+                ProjectDeleteEvent payload = objectMapper.convertValue(eventMessage.getPayload(), ProjectDeleteEvent.class);
+                log.info("Received project event with payload: {}", payload);
+
+                if (payload.getRecipientId() == null) {
+                    log.info("No recipient found for project event: {}", payload);
+                    return;
+                }
+
+                BaseEvent<ProjectDeleteEvent> event = BaseEvent.<ProjectDeleteEvent>builder()
+                        .eventType(EventType.PROJECT_DELETED)
                         .timestamp(eventMessage.getTimestamp())
                         .payload(payload)
                         .build();

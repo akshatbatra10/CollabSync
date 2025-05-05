@@ -15,6 +15,8 @@ import com.collabsync.backend.common.enums.ChangeType;
 import com.collabsync.backend.kafka.model.BaseEvent;
 import com.collabsync.backend.common.enums.EventType;
 import com.collabsync.backend.kafka.model.CollabUserChangedEvent;
+import com.collabsync.backend.kafka.model.ProjectDeleteEvent;
+import com.collabsync.backend.kafka.model.ProjectUpdateEvent;
 import com.collabsync.backend.kafka.producer.EventPublisher;
 import com.collabsync.backend.repository.ProjectRepository;
 import com.collabsync.backend.service.ProjectService;
@@ -141,10 +143,34 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!project.getOwner().getUsername().equals(username)) {
+            project.getMembers().stream()
+                    .filter(member -> member.getUser().getUsername().equals(username) &&
+                            member.getRole() == ProjectRole.ADMIN)
+                    .findFirst()
+                    .orElseThrow(() -> new InvalidCredentialsException("User is not authorized to update the project"));
+        }
+
         project.setName(request.getName() != null ? request.getName() : project.getName());
         project.setDescription(request.getDescription() != null ? request.getDescription() : project.getDescription());
 
         Project savedProject = projectRepository.save(project);
+
+        ProjectUpdateEvent projectUpdateEvent = ProjectUpdateEvent.builder()
+                .projectId(projectId)
+                .updatedBy(username)
+                .recipientId(project.getOwner().getId())
+                .build();
+
+        BaseEvent<ProjectUpdateEvent> baseEvent = BaseEvent.<ProjectUpdateEvent>builder()
+                .eventType(EventType.PROJECT_UPDATED)
+                .timestamp(LocalDateTime.now())
+                .payload(projectUpdateEvent)
+                .build();
+
+        eventPublisher.publish("project-events", baseEvent);
 
         return mapToDto(savedProject);
     }
@@ -155,10 +181,23 @@ public class ProjectServiceImpl implements ProjectService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (!project.getOwner().getUsername().equals(username)) {
-            throw new ResourceNotFoundException("User is not the owner of the project");
+            throw new InvalidCredentialsException("User is not the owner of the project");
         }
 
         projectRepository.deleteById(projectId);
+
+        ProjectDeleteEvent projectDeleteEvent = ProjectDeleteEvent.builder()
+                .projectId(projectId)
+                .recipientId(project.getOwner().getId())
+                .build();
+
+        BaseEvent<ProjectDeleteEvent> baseEvent = BaseEvent.<ProjectDeleteEvent>builder()
+                .eventType(EventType.PROJECT_DELETED)
+                .timestamp(LocalDateTime.now())
+                .payload(projectDeleteEvent)
+                .build();
+
+        eventPublisher.publish("project-events", baseEvent);
     }
 
     private CollaboratorResponseDto mapToDto(ProjectMember projectMember) {
