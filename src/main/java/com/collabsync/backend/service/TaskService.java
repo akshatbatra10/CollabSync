@@ -12,4 +12,12 @@ public interface TaskService {
     List<TaskResponseDto> getTasksByProjectId(Integer projectId);
 
     void assignTask(Integer taskId, String username);
+
+    void changeTaskStatus(Integer taskId, String status);
+
+    TaskResponseDto updateTask(Integer taskId, TaskRequestDto task);
+
+    void changeTaskPriority(Integer taskId, String priority);
+
+    void deleteTask(Integer taskId);
 }

@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 public class ProjectResponseDto {
 
-    private int id;
+    private Integer id;
     private String name;
     private String description;
     private UserResponseDto user;

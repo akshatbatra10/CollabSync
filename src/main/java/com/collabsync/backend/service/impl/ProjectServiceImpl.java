@@ -66,6 +66,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public ProjectResponseDto getProjectById(Integer projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + projectId));
+
+        return mapToDto(project);
+    }
+
+    @Override
     @Transactional
     public void addOrRemoveCollaborator(Integer projectId, String username, String action) {
         ChangeType changeType;
@@ -83,7 +91,11 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         if (!project.getOwner().getUsername().equals(loggedInUsername)) {
-            throw new InvalidCredentialsException("User is not the owner of the project");
+            project.getMembers().stream()
+                    .filter(member -> member.getUser().getUsername().equals(loggedInUsername) &&
+                            member.getRole() == ProjectRole.ADMIN)
+                    .findFirst()
+                    .orElseThrow(() -> new InvalidCredentialsException("User is not authorized to update the project"));
         }
 
         boolean alreadyExists = project.getMembers().stream()

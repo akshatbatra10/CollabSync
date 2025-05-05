@@ -33,6 +33,12 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable Integer projectId) {
+        ProjectResponseDto projectResponseDto = projectService.getProjectById(projectId);
+        return ResponseEntity.ok(projectResponseDto);
+    }
+
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectResponseDto> updateProject(@PathVariable Integer projectId,
                                                            @RequestBody @Valid ProjectRequestDto request) {
