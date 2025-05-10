@@ -1,5 +1,6 @@
 package com.collabsync.backend.security;
 
+import com.collabsync.backend.common.exceptions.InvalidCredentialsException;
 import com.collabsync.backend.config.JwtConfigProperties;
 import com.collabsync.backend.domain.model.User;
 import io.jsonwebtoken.Claims;
@@ -35,8 +36,12 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
+        try {
         return parseClaims(token)
                 .getSubject();
+        } catch (Exception e) {
+            throw new InvalidCredentialsException("Invalid token");
+        }
     }
 
     public boolean validateToken(String authToken, String username) {
